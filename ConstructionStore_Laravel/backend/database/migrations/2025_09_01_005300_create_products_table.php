@@ -13,9 +13,15 @@ return new class extends Migration
     {
         Schema::create('products', function (Blueprint $table) {
             $table->id();
+            $table->string('name', 200);
+            $table->decimal('price', 10, 2);
+            $table->unsignedBigInteger('category_id');
+            $table->unsignedBigInteger('supplier_id');
+            $table->integer('stock');
             $table->timestamps();
         });
     }
+
 
     /**
      * Reverse the migrations.

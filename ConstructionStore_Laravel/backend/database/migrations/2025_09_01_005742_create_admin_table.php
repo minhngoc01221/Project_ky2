@@ -11,11 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('admin', function (Blueprint $table) {
+        Schema::create('admins', function (Blueprint $table) {
             $table->id();
+            $table->string('username')->unique();
+            $table->string('password');
+            $table->string('email')->unique();
             $table->timestamps();
         });
     }
+
 
     /**
      * Reverse the migrations.
@@ -24,4 +28,5 @@ return new class extends Migration
     {
         Schema::dropIfExists('admin');
     }
+    
 };
