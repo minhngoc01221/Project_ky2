@@ -1,25 +1,13 @@
 <?php
-
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use App\Models\Product;
 
 class ProductSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
-    public function run()
+    public function run(): void
     {
-        \App\Models\Product::create([
-        'category_id' => 1,
-        'supplier_id' => 1,
-        'name' => 'Gạch men cao cấp',
-        'price' => 150000,
-        'stock' => 100
-    ]);
+        Product::create(['category_id'=>1,'supplier_id'=>1,'name'=>'Holcim Cement','price'=>75.5,'stock'=>100]);
     }
-
 }

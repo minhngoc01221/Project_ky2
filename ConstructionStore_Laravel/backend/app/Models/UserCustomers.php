@@ -4,9 +4,9 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Admin extends Model
+class UserCustomers extends Model
 {
     use HasFactory;
-    protected $table = 'admin';
-    protected $fillable = ['username','password','email'];
+    protected $table = 'user_customers';
+    protected $fillable = ['name','email','phone','address'];
 }

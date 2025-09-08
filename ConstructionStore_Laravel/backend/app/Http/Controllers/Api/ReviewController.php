@@ -1,49 +1,33 @@
 <?php
 
 namespace App\Http\Controllers\Api;
-
 use App\Http\Controllers\Controller;
+use App\Models\Review;
+use App\Models\Product;
 use Illuminate\Http\Request;
 
 class ReviewController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
-    {
-        //
-    }
+    public function index(){ return response()->json(Review::with('product')->paginate(20)); }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        //
-    }
+    public function store(Request $request){
+        $data = $request->validate([
+            'product_id'=>'required|exists:products,id',
+            'customer_id'=>'required|exists:user_customer,id',
+            'rating'=>'required|integer|min:1|max:5',
+            'comment'=>'nullable|string',
+        ]);
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
+        $review = Review::create($data);
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
+        // Optionally update product average rating (simple approach)
+        $product = Product::find($data['product_id']);
+        if ($product) {
+            $avg = $product->reviews()->avg('rating');
+            $product->rating = $avg;
+            $product->save();
+        }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
+        return response()->json($review,201);
     }
 }

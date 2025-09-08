@@ -4,9 +4,9 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Admin extends Model
+class UserTransport extends Model
 {
     use HasFactory;
-    protected $table = 'admin';
-    protected $fillable = ['username','password','email'];
+    protected $table = 'user_transport';
+    protected $fillable = ['name','phone','address'];
 }

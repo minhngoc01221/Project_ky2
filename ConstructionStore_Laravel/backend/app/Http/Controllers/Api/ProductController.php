@@ -3,75 +3,92 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\Product; 
+use App\Models\Product;
+use App\Models\Category;
+use App\Models\Supplier;
 use Illuminate\Http\Request;
 
 class ProductController extends Controller
 {
-    // Lấy danh sách sản phấm
-    public function index()
+    public function index(Request $request)
     {
-        return response()->json(Product::all(), 200);
+        $query = Product::query()->with(['category','supplier']);
+
+        if ($request->filled('category_id')) $query->where('category_id', $request->category_id);
+        if ($request->filled('supplier_id')) $query->where('supplier_id', $request->supplier_id);
+        if ($request->filled('min_price')) $query->where('price', '>=', $request->min_price);
+        if ($request->filled('max_price')) $query->where('price', '<=', $request->max_price);
+        if ($request->filled('q')) {
+            $q = $request->q;
+            $query->where(function($q2) use ($q) {
+                $q2->where('name', 'like', "%{$q}%")
+                   ->orWhere('description', 'like', "%{$q}%");
+            });
+        }
+
+        return response()->json($query->paginate(20));
     }
 
-    // Thêm sản phẩm
-    public function store(Request $request)
-    {
-        $validated = $request->validate([
-            'name' => 'required|string|max:200',
-            'price' => 'required|numeric',
-            'category_id' => 'required|integer|exists:categories,id',
-            'supplier_id' => 'required|integer|exists:suppliers,id',
-            'stock' => 'required|integer'
-        ]);
-
-        $product = Product::create($validated);
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Thêm sản phẩm thành công!',
-            'data' => $product
-        ], 201);
-    }
-
-    // Xem chi tiết sản phẩm
     public function show($id)
     {
-        $product = Product::findOrFail($id);
-        return response()->json($product, 200);
+        $product = Product::with(['category','supplier'])->find($id);
+        if (! $product) return response()->json(['message'=>'Product not found'], 404);
+        return response()->json($product);
     }
 
-    // Sửa sản phẩm
-    public function update(Request $request, $id)
+    public function store(Request $request)
     {
-        $product = Product::findOrFail($id);
-
-        $validated = $request->validate([
-            'name' => 'sometimes|required|string|max:200',
-            'price' => 'sometimes|required|numeric',
-            'category_id' => 'sometimes|required|integer|exists:categories,id',
-            'supplier_id' => 'sometimes|required|integer|exists:suppliers,id',
-            'stock' => 'sometimes|required|integer'
+        $data = $request->validate([
+            'name' => 'required|string|max:200',
+            'price' => 'required|numeric|min:0',
+            'stock' => 'nullable|integer|min:0',
+            'category_id' => 'nullable|exists:categories,id',
+            'supplier_id' => 'nullable|exists:suppliers,id',
+            'description' => 'nullable|string',
         ]);
 
-        $product->update($validated);
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Cập nhật sản phẩm thành công!',
-            'data' => $product
-        ], 200);
+        $product = Product::create($data);
+        return response()->json($product, 201);
     }
 
-    // Xóa sản phẩm
+    public function update(Request $request, $id)
+    {
+        $product = Product::find($id);
+        if (! $product) return response()->json(['message'=>'Product not found'], 404);
+
+        $data = $request->validate([
+            'name' => 'sometimes|required|string|max:200',
+            'price' => 'sometimes|required|numeric|min:0',
+            'stock' => 'sometimes|integer|min:0',
+            'category_id' => 'sometimes|exists:categories,id',
+            'supplier_id' => 'sometimes|exists:suppliers,id',
+            'description' => 'nullable|string',
+        ]);
+
+        $product->update($data);
+        return response()->json($product);
+    }
+
     public function destroy($id)
     {
-        $product = Product::findOrFail($id);
+        $product = Product::find($id);
+        if (! $product) return response()->json(['message'=>'Product not found'], 404);
         $product->delete();
+        return response()->json(['message'=>'Product deleted']);
+    }
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Xóa sản phẩm thành công!'
-        ], 200);
+    // Adjust stock manually (for inventory adjustments)
+    public function adjustStock(Request $request, $id)
+    {
+        $request->validate([
+            'quantity' => 'required|integer',
+            'reason' => 'nullable|string',
+        ]);
+
+        $product = Product::findOrFail($id);
+        $product->stock = max(0, ($product->stock ?? 0) + (int)$request->quantity);
+        $product->save();
+
+        return response()->json($product);
     }
 }

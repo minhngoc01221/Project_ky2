@@ -4,9 +4,9 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Admin extends Model
+class ImagesPost extends Model
 {
     use HasFactory;
-    protected $table = 'admin';
-    protected $fillable = ['username','password','email'];
+    protected $table = 'images_post';
+    protected $fillable = ['title','image_url','user_id'];
 }

@@ -1,49 +1,36 @@
 <?php
 
 namespace App\Http\Controllers\Api;
-
 use App\Http\Controllers\Controller;
+use App\Models\ImportExport;
+use App\Models\Product;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class ImportExportController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
+    // record import or export and update product stock accordingly
     public function store(Request $request)
     {
-        //
-    }
+        $data = $request->validate([
+            'type' => 'required|in:import,export',
+            'product_id' => 'required|exists:products,id',
+            'quantity' => 'required|integer|min:1',
+            'date' => 'nullable|date',
+        ]);
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
+        DB::transaction(function() use ($data) {
+            $record = ImportExport::create($data);
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
+            $product = Product::findOrFail($data['product_id']);
+            if ($data['type'] === 'import') {
+                $product->stock = ($product->stock ?? 0) + $data['quantity'];
+            } else {
+                $product->stock = max(0, ($product->stock ?? 0) - $data['quantity']);
+            }
+            $product->save();
+        });
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
+        return response()->json(['message'=>'Import/Export recorded and stock updated'],201);
     }
 }
