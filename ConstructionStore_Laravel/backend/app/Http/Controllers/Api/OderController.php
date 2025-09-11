@@ -8,7 +8,7 @@ use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
-class OrderController extends Controller
+class OderController extends Controller
 {
     public function index(){ return response()->json(Order::with(['orderDetails.product','customer','transport'])->paginate(20)); }
 

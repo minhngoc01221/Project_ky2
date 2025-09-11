@@ -9,7 +9,7 @@ use App\Http\Controllers\Api\SupplierController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\OrderController;
-use App\Http\Controllers\Api\OderDetailController;
+use App\Http\Controllers\Api\OderDetailsController;
 use App\Http\Controllers\Api\ReviewController;
 use App\Http\Controllers\Api\RetailController;
 use App\Http\Controllers\Api\WholesaleController;
@@ -22,20 +22,20 @@ use App\Http\Controllers\Api\ImageExportController;
 
 
 Route::apiResource('admin', AdminController::class);
-Route::apiResource('user-customers', UserCustomersController::class); // xong lỗi
-Route::apiResource('user-transports', UserTransportController::class);// xong lỗi 
-Route::apiResource('suppliers', SupplierController::class);// xonglỗi
+Route::apiResource('user-customers', UserCustomersController::class); 
+Route::apiResource('user-transports', UserTransportController::class);
+Route::apiResource('suppliers', SupplierController::class);
 Route::apiResource('categories', CategoryController::class);
 Route::apiResource('products', ProductController::class);
 Route::apiResource('orders', OrderController::class);
-Route::apiResource('oder-details', OderDetailController::class); // lỗi 
-Route::apiResource('reviews', ReviewController::class); // lỗi 
-Route::apiResource('retails', RetailController::class); // lỗi 
-Route::apiResource('wholesales', WholesaleController::class); // lỗi 
+Route::apiResource('oder-details', OderDetailsController::class); // lỗi 
+Route::apiResource('reviews', ReviewController::class); 
+Route::apiResource('retail', RetailController::class); 
+Route::apiResource('wholesales', WholesaleController::class); 
 Route::apiResource('import-exports', ImportExportController::class); // lỗi 
-Route::apiResource('inventories', InventoryController::class); // lỗi 
+Route::apiResource('inventory', InventoryController::class); 
 Route::apiResource('monitors', MonitorController::class);
 Route::apiResource('warnings', WarningController::class);
 Route::apiResource('image-posts', ImagePostController::class); // lỗi 
 Route::apiResource('image-exports', ImageExportController::class); // lỗi 
-Route::apiResource('reviews', ReviewController::class); // lỗi
+Route::apiResource('reviews', ReviewController::class); 

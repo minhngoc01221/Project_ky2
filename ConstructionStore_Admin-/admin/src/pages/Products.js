@@ -25,7 +25,6 @@ export default function Products(){
         <div className="table-row header">
           <div className="cell">#</div>
           <div className="cell">Product</div>
-          <div className="cell">SKU</div>
           <div className="cell">Price</div>
           <div className="cell">Stock</div>
           <div className="cell">Updated</div>
@@ -35,7 +34,6 @@ export default function Products(){
           <div className="table-row" key={r.id}>
             <div className="cell">{idx+1}</div>
             <div className="cell">{r.name}</div>
-            <div className="cell">{r.sku}</div>
             <div className="cell">{r.price}</div>
             <div className="cell">{r.stock}</div>
             <div className="cell">{r.updated}</div>
