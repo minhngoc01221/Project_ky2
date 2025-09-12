@@ -14,6 +14,7 @@ class DatabaseSeeder extends Seeder
             SupplierSeeder::class,
             ProductSeeder::class,
             MonitorWarningTransportSeeder::class,
+            DashboardSeeder::class, 
         ]);
     }
 }

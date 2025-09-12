@@ -20,6 +20,10 @@ use App\Http\Controllers\Api\WarningController;
 use App\Http\Controllers\Api\ImagePostController;
 use App\Http\Controllers\Api\ImageExportController;
 
+use App\Http\Controllers\Api\DashboardController;
+
+Route::get('/dashboard', [DashboardController::class, 'index']);
+
 
 Route::apiResource('admin', AdminController::class);
 Route::apiResource('user-customers', UserCustomersController::class); 
