@@ -1,94 +1,73 @@
 <?php
 
+// app/Http/Controllers/Api/ProductController.php
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Product;
-use App\Models\Category;
-use App\Models\Supplier;
 use Illuminate\Http\Request;
 
 class ProductController extends Controller
 {
+    // Lấy danh sách (có phân trang)
     public function index(Request $request)
     {
-        $query = Product::query()->with(['category','supplier']);
+        $limit = $request->input('limit', 15);
+        $products = Product::orderBy('updated_at', 'desc')->paginate($limit);
 
-        if ($request->filled('category_id')) $query->where('category_id', $request->category_id);
-        if ($request->filled('supplier_id')) $query->where('supplier_id', $request->supplier_id);
-        if ($request->filled('min_price')) $query->where('price', '>=', $request->min_price);
-        if ($request->filled('max_price')) $query->where('price', '<=', $request->max_price);
-        if ($request->filled('q')) {
-            $q = $request->q;
-            $query->where(function($q2) use ($q) {
-                $q2->where('name', 'like', "%{$q}%")
-                   ->orWhere('description', 'like', "%{$q}%");
-            });
-        }
-
-        return response()->json($query->paginate(20));
+        return response()->json([
+            "data" => $products->items(),
+            "total" => $products->total(),
+            "current_page" => $products->currentPage(),
+        ]);
     }
 
+    // Lấy chi tiết 1 sản phẩm
     public function show($id)
     {
-        $product = Product::with(['category','supplier'])->find($id);
-        if (! $product) return response()->json(['message'=>'Product not found'], 404);
-        return response()->json($product);
+        return Product::findOrFail($id);
     }
 
+    // Tạo mới
     public function store(Request $request)
     {
-        $data = $request->validate([
-            'name' => 'required|string|max:200',
-            'price' => 'required|numeric|min:0',
-            'stock' => 'nullable|integer|min:0',
-            'category_id' => 'nullable|exists:categories,id',
-            'supplier_id' => 'nullable|exists:suppliers,id',
-            'description' => 'nullable|string',
+        $validated = $request->validate([
+            "name" => "required|string|max:255",
+            "sku" => "required|string|max:255|unique:products",
+            "price" => "required|numeric|min:0",
+            "stock" => "required|integer|min:0",
+            "thumbnail" => "nullable|string",
         ]);
 
-        $product = Product::create($data);
+        $product = Product::create($validated);
+
         return response()->json($product, 201);
     }
 
+    // Cập nhật
     public function update(Request $request, $id)
     {
-        $product = Product::find($id);
-        if (! $product) return response()->json(['message'=>'Product not found'], 404);
+        $product = Product::findOrFail($id);
 
-        $data = $request->validate([
-            'name' => 'sometimes|required|string|max:200',
-            'price' => 'sometimes|required|numeric|min:0',
-            'stock' => 'sometimes|integer|min:0',
-            'category_id' => 'sometimes|exists:categories,id',
-            'supplier_id' => 'sometimes|exists:suppliers,id',
-            'description' => 'nullable|string',
+        $validated = $request->validate([
+            "name" => "required|string|max:255",
+            "sku" => "required|string|max:255|unique:products,sku,".$id,
+            "price" => "required|numeric|min:0",
+            "stock" => "required|integer|min:0",
+            "thumbnail" => "nullable|string",
         ]);
 
-        $product->update($data);
+        $product->update($validated);
+
         return response()->json($product);
     }
 
+    // Xóa
     public function destroy($id)
     {
-        $product = Product::find($id);
-        if (! $product) return response()->json(['message'=>'Product not found'], 404);
-        $product->delete();
-        return response()->json(['message'=>'Product deleted']);
-    }
-
-    // Adjust stock manually (for inventory adjustments)
-    public function adjustStock(Request $request, $id)
-    {
-        $request->validate([
-            'quantity' => 'required|integer',
-            'reason' => 'nullable|string',
-        ]);
-
         $product = Product::findOrFail($id);
-        $product->stock = max(0, ($product->stock ?? 0) + (int)$request->quantity);
-        $product->save();
+        $product->delete();
 
-        return response()->json($product);
+        return response()->json(["message" => "Deleted successfully"]);
     }
 }
